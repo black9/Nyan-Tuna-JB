@@ -1,0 +1,4 @@
+PATCHNAME=$(basename $1)
+wget $1
+cat $PATCHNAME |patch -p1
+rm $PATCHNAME
