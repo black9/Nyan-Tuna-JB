@@ -38,7 +38,7 @@ static unsigned int susp_enabled = 0;
 static unsigned int suspended = 0;
 static unsigned int registration = 0;
 static unsigned int suspend_cpu_up = 95;
-static unsigned int highfreq = 1350000;
+static unsigned int highfreq = 1375000;
 
 /* greater than 80% avg load across online CPUs increases frequency */
 #define DEFAULT_UP_FREQ_MIN_LOAD			(80)
