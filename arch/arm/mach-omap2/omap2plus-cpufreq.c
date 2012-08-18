@@ -441,6 +441,7 @@ struct freq_attr omap_cpufreq_attr_screen_off_freq = {
 	.store = store_screen_off_freq,
 };
 
+#ifdef CONFIG_CUSTOM_VOLTAGE
 /*
  * Variable GPU OC - sysfs interface for cycling through different GPU top speeds
  * Author: imoseyon@gmail.com
@@ -476,8 +477,6 @@ static ssize_t store_gpu_oc(struct cpufreq_policy *policy, const char *buf, size
 	
 	return size;
 }
-
-#ifdef CONFIG_CUSTOM_VOLTAGE
 static ssize_t show_UV_mV_table(struct cpufreq_policy * policy, char * buf)
 {
     return customvoltage_mpuvolt_read(NULL, NULL, buf);
@@ -495,19 +494,20 @@ static struct freq_attr omap_UV_mV_table = {
     .show = show_UV_mV_table,
     .store = store_UV_mV_table,
 };
-#endif
 
 static struct freq_attr gpu_oc = {
 	.attr = {.name = "gpu_oc", .mode=0666,},
 	.show = show_gpu_oc,
 	.store = store_gpu_oc,
 };
+#endif
 
 static struct freq_attr *omap_cpufreq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
 	&omap_cpufreq_attr_screen_off_freq,
 #ifdef CONFIG_CUSTOM_VOLTAGE
 	&omap_UV_mV_table,
+	&gpu_oc,
 #endif
 	NULL,
 };
