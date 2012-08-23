@@ -477,6 +477,7 @@ static ssize_t store_gpu_oc(struct cpufreq_policy *policy, const char *buf, size
 	
 	return size;
 }
+
 static ssize_t show_UV_mV_table(struct cpufreq_policy * policy, char * buf)
 {
     return customvoltage_mpuvolt_read(NULL, NULL, buf);
@@ -561,7 +562,6 @@ static struct platform_device omap_cpufreq_device = {
 static int __init omap_cpufreq_init(void)
 {
 	int ret;
-
 	oc_val = 0;
 
 	if (cpu_is_omap24xx())
