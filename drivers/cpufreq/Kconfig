@@ -138,7 +138,7 @@ config CPU_FREQ_DEFAULT_GOV_WHEATLEY
           Use the CPUFreq governor 'wheatley' as default.
 
 config CPU_FREQ_DEFAULT_GOV_PEGASUSQ
-        bool "wheatley"
+        bool "pegasusq"
         select CPU_FREQ_GOV_PEGASUSQ
         help
           Use the CPUFreq governor 'pegasusq' as default.
