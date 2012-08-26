@@ -8136,6 +8136,7 @@ static void init_tg_cfs_entry(struct task_group *tg, struct cfs_rq *cfs_rq,
 	struct rq *rq = cpu_rq(cpu);
 
 	cfs_rq->tg = tg;
+	init_cfs_rq_runtime(cfs_rq);
 	cfs_rq->rq = rq;
 #ifdef CONFIG_SMP
 	/* allow initial update_cfs_load() to truncate */
