@@ -455,24 +455,24 @@ static ssize_t store_gpu_oc(struct cpufreq_policy *policy, const char *buf, size
 {
 	int prev_oc, ret1, ret2; 
         struct device *dev;
-	unsigned long gpu_freqs[4] = {307200000,384000000,460000000,512000000};
+	unsigned long gpu_freqs[3] = {307200000,384000000,512000000};
 
 	prev_oc = oc_val;
-	if (prev_oc < 0 || prev_oc > 3) {
+	if (prev_oc < 0 || prev_oc > 2) {
 		// shouldn't be here
-		pr_info("[GPU_OC] GPU_OC value out of range - bailing\n");
+		pr_info("[imoseyon] gpu_oc error - bailing\n");	
 		return size;
 	}
 	
 	sscanf(buf, "%d\n", &oc_val);
 	if (oc_val < 0 ) oc_val = 0;
-	if (oc_val > 3 ) oc_val = 3;
+	if (oc_val > 2 ) oc_val = 2;
 	if (prev_oc == oc_val) return size;
 
         dev = omap_hwmod_name_get_dev("gpu");
         ret1 = opp_disable(dev, gpu_freqs[prev_oc]);
         ret2 = opp_enable(dev, gpu_freqs[oc_val]);
-        pr_info("[GPU_OC] GPU top speed changed from %lu to %lu (%d,%d)\n",
+        pr_info("[imoseyon] gpu top speed changed from %lu to %lu (%d,%d)\n", 
 		gpu_freqs[prev_oc], gpu_freqs[oc_val], ret1, ret2);
 	
 	return size;
@@ -506,9 +506,9 @@ static struct freq_attr gpu_oc = {
 static struct freq_attr *omap_cpufreq_attr[] = {
 	&cpufreq_freq_attr_scaling_available_freqs,
 	&omap_cpufreq_attr_screen_off_freq,
-	&gpu_oc,
 #ifdef CONFIG_CUSTOM_VOLTAGE
 	&omap_UV_mV_table,
+	&gpu_oc,
 #endif
 	NULL,
 };
