@@ -1,6 +1,7 @@
 /* drivers/misc/touch_wake.c
  *
  * Copyright 2011  Ezekeel
+ * Modified by Renaud Allard (2012)
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -24,6 +25,7 @@ static bool touchwake_enabled = true;
 static bool touch_disabled = false;
 static bool device_suspended = false;
 static bool timed_out = true;
+static bool always_wake_enabled = true;
 static unsigned int touchoff_delay = 60000;
 static const unsigned int presspower_delay = 100;
 static void touchwake_touchoff(struct work_struct * touchoff_work);
@@ -34,28 +36,22 @@ static DEFINE_MUTEX(lock);
 static struct input_dev * powerkey_device;
 static struct timeval last_powerkeypress;
 
-#define TOUCHWAKE_VERSION 1
-#define TIME_LONGPRESS 250
+#define TOUCHWAKE_VERSION 2
+#define TIME_LONGPRESS 400
 
 static void touchwake_disable_touch(void)
 {
     pr_info("disable touch controls\n");
-
     touchscreen_disable();
-
     touch_disabled = true;
-
     return;
 }
 
 static void touchwake_enable_touch(void)
 {
     pr_info("enable touch controls\n");
-
     touchscreen_enable();
-
     touch_disabled = false;
-
     return;
 }
 
@@ -63,12 +59,14 @@ static void touchwake_early_suspend(struct early_suspend * h)
 {
     if (touchwake_enabled)
 	{
-	    if (touchoff_delay > 0)
-		{
-		    if (timed_out)
-			    schedule_delayed_work(&touchoff_work, msecs_to_jiffies(touchoff_delay));
-		    else
-			    touchwake_disable_touch();
+	if (!always_wake_enabled) {
+		    if (touchoff_delay > 0)
+			{
+			    if (timed_out)
+				    schedule_delayed_work(&touchoff_work, msecs_to_jiffies(touchoff_delay));
+			    else
+				    touchwake_disable_touch();
+			}
 		}
 	}
     else
@@ -123,6 +121,42 @@ static void press_powerkey(struct work_struct * presspower_work)
     return;
 }
 
+static ssize_t always_wake_read(struct device * dev, struct device_attribute * attr, char * buf)
+{
+    return sprintf(buf, "%u\n", (always_wake_enabled ? 1 : 0));
+}
+
+static ssize_t always_wake_write(struct device * dev, struct device_attribute * attr, const char * buf, size_t size)
+{
+    unsigned int data;
+
+    if(sscanf(buf, "%u\n", &data) == 1) 
+	{
+	    pr_devel("%s: %u \n", __FUNCTION__, data);
+	    
+	    if (data == 1) 
+		{
+		    pr_info("%s: Always wake enabled\n", __FUNCTION__);
+		    always_wake_enabled = true;
+		} 
+	    else if (data == 0) 
+		{
+		    pr_info("%s: Always wake disabled\n", __FUNCTION__);
+		    always_wake_enabled = false;
+		} 
+	    else 
+		{
+		    pr_info("%s: invalid input range %u\n", __FUNCTION__, data);
+		}
+	} 
+    else 
+	{
+	    pr_info("%s: invalid input\n", __FUNCTION__);
+	}
+
+    return size;
+}
+
 static ssize_t touchwake_status_read(struct device * dev, struct device_attribute * attr, char * buf)
 {
     return sprintf(buf, "%u\n", (touchwake_enabled ? 1 : 0));
@@ -171,7 +205,6 @@ static ssize_t touchwake_delay_write(struct device * dev, struct device_attribut
     if(sscanf(buf, "%u\n", &data) == 1) 
 	{
 	    touchoff_delay = data;
-
 	    pr_info("TOUCHWAKE delay set to %u\n", touchoff_delay); 
 	} 
     else 
@@ -189,6 +222,7 @@ static ssize_t touchwake_version(struct device * dev, struct device_attribute * 
 
 static DEVICE_ATTR(enabled, S_IRUGO | S_IWUGO, touchwake_status_read, touchwake_status_write);
 static DEVICE_ATTR(delay, S_IRUGO | S_IWUGO, touchwake_delay_read, touchwake_delay_write);
+static DEVICE_ATTR(always, S_IRUGO | S_IWUGO, always_wake_read, always_wake_write);
 static DEVICE_ATTR(version, S_IRUGO , touchwake_version, NULL);
 
 static struct attribute *touchwake_notification_attributes[] = 
@@ -196,6 +230,7 @@ static struct attribute *touchwake_notification_attributes[] =
 	&dev_attr_enabled.attr,
 	&dev_attr_delay.attr,
 	&dev_attr_version.attr,
+	&dev_attr_always.attr,
 	NULL
     };
 
