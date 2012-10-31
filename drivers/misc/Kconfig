@@ -627,4 +627,10 @@ config VIBRATOR_CONTROL
 	help
 	  Say Y here to enable Vibrator Control
 
+config LIVE_OC
+        bool "Support for Live OC"
+        default y
+        help
+          Say Y here to enable Live OC
+
 endif # MISC_DEVICES
