@@ -146,11 +146,11 @@ config CPU_FREQ_DEFAULT_GOV_WHEATLEY
         help
           Use the CPUFreq governor 'wheatley' as default.
 
-config CPU_FREQ_GOV_LULZACTIVEQ
-        tristate "'lulzactiveq' cpufreq governor"
-        depends on CPU_FREQ
+config CPU_FREQ_DEFAULT_GOV_LULZACTIVEQ
+        bool "lulzactiveq"
+        select CPU_FREQ_GOV_LULZACTIVEQ
         help
-          'lulzactiveq' - hotplug mechanism added in lulzactive
+          Use the CPUFreq governor 'lulzactiveq' as default.
 
 config CPU_FREQ_DEFAULT_GOV_PEGASUSQ
         bool "pegasusq"
@@ -277,6 +277,10 @@ config CPU_FREQ_GOV_LAZY
 
 config CPU_FREQ_GOV_PEGASUSQ
         tristate "'pegasusq' cpufreq governor"
+        depends on CPU_FREQ
+
+config CPU_FREQ_GOV_LULZACTIVEQ
+        tristate "'lulzactiveq' cpufreq governor"
         depends on CPU_FREQ
 
 config CPU_FREQ_GOV_WHEATLEY
